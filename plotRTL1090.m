@@ -24,21 +24,30 @@ end
 while true % adjust duration here or stop with Ctrl+C
 
     % Get data from server
-    data   = urlread('http://urlofthedump1090server:8080/data.json');
+%    data = urlread('http://trckr.ch:8888/tar1090/data/aircraft.json');
+    data   = urlread('http://192.168.1.81/persist/data/aircraft.json');
     planes = fromjson(data); % https://github.com/christianpanton/matlab-json
     
     % Parse data
-    N   = length(planes);
+    N   = length(planes.aircraft);
     val = 0;
-    for i = 1:length(planes)
-        if planes{i}.validposition
-            val = val + 1;
-            lat = [lat planes{i}.lat]; %#ok<*AGROW,*SAGROW>
-            lon = [lon planes{i}.lon];
-            alt = [alt planes{i}.altitude];
-            spd = [spd planes{i}.speed];
-            tim = [tim now];
-            flg{length(lat)} = planes{i}.flight;
+    for i = 1:length(planes.aircraft)
+        plane = planes.aircraft{i};
+        % changed sanity check to "isfield"
+        if isfield(plane,'lat')
+            if isfield(plane,'alt_geom')
+                if isfield(plane,'mach')
+                    if isfield(plane,'flight')
+                        val = val + 1;
+                        lat = [lat plane.lat];
+                        lon = [lon plane.lon];
+                        alt = [alt plane.alt_geom];
+                        spd = [spd plane.mach];
+                        tim = [tim now];
+                        flg{length(lat)} = plane.flight;
+                    end
+                end
+            end
         end
     end
     disp([num2str(N) ' planes detected with ' num2str(val) ' valid coords'])
@@ -61,7 +70,7 @@ figure('Renderer','opengl',...
        'DefaultTextHorizontalAlignment', 'right')
 
 % Settings
-centerLoc = [39.489233,-0.478026]; % LEVC
+centerLoc = [47.1, 7.6]; % lat / long
 lineColor = [0.7,0.7,0.7];
 vertiExag = 5; % vertical exaggeration
 markSize  = 21;
@@ -79,11 +88,11 @@ SHPdir    = '.\SHPs\';
 % Change 'es' for the ISO_A2 code of your country
 % For all countries delete selector or input non-existent field (ISO_A2 => foo)
 countries = shaperead([SHPdir 'ne_10m_admin_0_countries.shp'],...
-            'Selector',{@(x) strcmpi(x,'es'),'ISO_A2'},'UseGeoCoords', true);
+            'Selector',{@(x) strcmpi(x,'CHE'),'ISO_A3'},'UseGeoCoords', true);
 % Change 'ES.VC' for the provinces/states of your preference or use a RegExp
 % for all provinces: @(x) strcmpi(x,'ES.VC') => @(x) ~isempty(regexpi(x,'^ES.*$'))
 provinces = shaperead([SHPdir 'ne_10m_admin_1_states_provinces.shp'],...
-            'Selector',{@(x) strcmpi(x,'ES.VC'),'region_cod'},'UseGeoCoords', true);
+            'Selector',{@(x) strcmpi(x,'CHE'),'region_cod'},'UseGeoCoords', true);
 [x,y]     = mfwdtran(mstruct,[countries.Lat provinces.Lat],[countries.Lon provinces.Lon]);
 [xc,yc]   = mfwdtran(mstruct,centerLoc(1),centerLoc(2));
 plot(x,y,'-k')
@@ -102,12 +111,13 @@ plot([xc xc],[yc-i-10e3 yc+i+10e3],'-','color',lineColor)
 plot([xc-i-10e3 xc+i+10e3],[yc yc],'-','color',lineColor)
 
 % Plot traces
-filter    = alt < 150000; % You can filter per altitude (feet), speed, etc.
+filter    = (alt < 150000); % You can filter per altitude (feet), speed, etc.
                           % To filter per airline use a cell function:
                           % For Ryanair: filter = cellfun(@(x) ~isempty(regexpi(x,'^RYR.*$')),flg);
 color     = alt; % Color by altitude or by speed, squawk... 
 [x,y]     = mfwdtran(mstruct,lat(filter),lon(filter));
-scatter3(x(filter),y(filter),vertiExag.*alt(filter).*0.3048,markSize,color(filter),'Marker','.')
+scatter3(x,y,vertiExag.*alt(filter).*0.3048,markSize,color(filter),'Marker','.')
+colormap parula            % change color map to e.g. "jet" or "spring"
 
 % Some more figure settings
 axis equal
@@ -120,8 +130,8 @@ axis off
 pos       = [0, 0, 856, floor(482/0.8)]; % This gives a 854 x 480 mp4/gif whith the selected cropping
 set(gcf, 'Position', pos);
 axis vis3d
-view(-7,26) % Some fiddling required!
-camzoom(1.65) % Same here!
+view(-7,16) % Some fiddling required!
+camzoom(1.4) % Same here!
 set(gca, 'LooseInset', [0,0,0,0]);
 
 % Prepare animation
