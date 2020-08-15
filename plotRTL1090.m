@@ -92,7 +92,7 @@ countries = shaperead([SHPdir 'ne_10m_admin_0_countries.shp'],...
 % Change 'ES.VC' for the provinces/states of your preference or use a RegExp
 % for all provinces: @(x) strcmpi(x,'ES.VC') => @(x) ~isempty(regexpi(x,'^ES.*$'))
 provinces = shaperead([SHPdir 'ne_10m_admin_1_states_provinces.shp'],...
-            'Selector',{@(x) strcmpi(x,'CHE'),'region_cod'},'UseGeoCoords', true);
+            'Selector',{@(x) ~isempty(regexpi(x,'^CH.*$')),'code_hasc'},'UseGeoCoords', true);
 [x,y]     = mfwdtran(mstruct,[countries.Lat provinces.Lat],[countries.Lon provinces.Lon]);
 [xc,yc]   = mfwdtran(mstruct,centerLoc(1),centerLoc(2));
 plot(x,y,'-k')
