@@ -2,6 +2,8 @@ PlotRTL1090
 ===========
 *3D visualization of air traffic through RTL-SDR (dump1090) and MATLAB*
 
+*Switzerland edition - featuring a 3D elevation map (relief)*
+
 Summary
 ---
 PlotRTL1090 is a simple MATLAB routine to record and visualize air traffic. It makes use of the excellent [`dump1090`](https://github.com/MalcolmRobb/dump1090), forked by MalcolmRobb from antirez which profits from the ability of a ~$6 USB DTV receptor (RTL-SDR) to relay raw radio data along a wide spectrum, including the 1090 MHz frequency in which aircraft broadcast ADS-B messages indicating their callsign, altitude, speed, position, etc.
@@ -17,7 +19,7 @@ Example results
 ---
 The file `coords` contains a recording of air traffic around the Valencia area (LEVC) in Spain. The file `coords_nl` has been supplied by [/u/theodric](https://www.reddit.com/user/theodric) of [/r/RTLSDR](https://www.reddit.com/r/RTLSDR) using this code near Amsterdam-Schiphol (EHAM) area in The Netherlands. Using these files some sample renderings are shown below.
 
-* **Valencia Airport (LEVC):** using the default options of the provided MATLAB script, the following render can be reproduced:
+* **Personal ADS-B receiver (LSZB):** using the default options of the provided MATLAB script, the following render can be reproduced:
 ![Resultado](plot1090_3D.gif)
 
 * **Amsterdam-Schiphol Airport (EHAM):** in order to use the data from Schiphol, we must also modify the bullseye center and select which land contours to plot. In this case the most simple option is to select all countries (the render time will be increased):
@@ -47,6 +49,7 @@ Acknowledgements
 * Antirez and MalcolmRobb for [`dump1090`](https://github.com/MalcolmRobb/dump1090).
 * Christianpanton for the included [`matlab-json`](https://github.com/christianpanton/matlab-json) function.
 * [Natural Earth](http://www.naturalearthdata.com/) for releasing the included shapefiles as public domain.
+* [Swiss Topo](https://shop.swisstopo.admin.ch/en/products/height_models/dhm25200) for releasing a free 200m DEM of Switzerland (need to download separately)
 
 Licensing
 ---
